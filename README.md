@@ -1,229 +1,229 @@
-# Library Management System
+# Система Управління Бібліотекою
 
-A comprehensive OOP mini-project implementing a library management system with a layered architecture demonstrating SOLID principles, design patterns, and clean code practices.
+Комплексний міні-проект ООП, що реалізує систему управління бібліотекою з шарованою архітектурою, демонструючи принципи SOLID, патерни проектування та практики чистого коду.
 
-## Project Overview
+## Огляд Проекту
 
-The Library Management System (LMS) is a console-based application that manages library operations including:
-- Patron registration and management
-- Book inventory management
-- Book borrowing and returns
-- Overdue fee tracking
+Система Управління Бібліотекою (LMS) - це консольний додаток, що керує операціями бібліотеки, включаючи:
+- Реєстрація та управління відвідувачами
+- Управління інвентарем книг
+- Позичення та повернення книг
+- Відстеження штрафів за прострочення
 
-This project serves as an educational implementation for Iteration 1 of the OOP Mini-Project Lab 34.
+Цей проект служить як освітня реалізація для Ітерації 1 міні-проекту ООП Lab 34.
 
-## Architecture
+## Архітектура
 
-The system follows a **Layered Architecture** pattern with clear separation of concerns:
+Система дотримується патерну **Шарової Архітектури** з чітким розділенням відповідальності:
 
 ```
 src/
-├── LibraryManagementSystem.Domain/          # Business entities & rules
-│   ├── Book.cs                              # Book entity with validation
-│   ├── Copy.cs                              # Physical copy of a book
-│   ├── Patron.cs                            # Library patron
-│   ├── BorrowRecord.cs                      # Borrow transaction record
-│   ├── OverduePolicy.cs                     # Business rules for overdue fees
-│   ├── CopyStatus.cs                        # Enumeration for copy status
-│   └── Repositories/                        # Repository interfaces
+├── LibraryManagementSystem.Domain/          # Бізнес-сутності та правила
+│   ├── Book.cs                              # Сутність книги з валідацією
+│   ├── Copy.cs                              # Фізична копія книги
+│   ├── Patron.cs                            # Відвідувач бібліотеки
+│   ├── BorrowRecord.cs                      # Запис транзакції позичення
+│   ├── OverduePolicy.cs                     # Бізнес-правила для штрафів за прострочення
+│   ├── CopyStatus.cs                        # Перерахування для статусу копії
+│   └── Repositories/                        # Інтерфейси репозиторіїв
 │       └── IPatronRepository, IBookRepository, IBorrowRepository
 │
-├── LibraryManagementSystem.Application/     # Business logic & use cases
-│   ├── PatronService.cs                     # Patron management logic
-│   ├── BookService.cs                       # Book management logic
-│   └── BorrowService.cs                     # Borrowing orchestration
+├── LibraryManagementSystem.Application/     # Бізнес-логіка та випадки використання
+│   ├── PatronService.cs                     # Логіка управління відвідувачами
+│   ├── BookService.cs                       # Логіка управління книгами
+│   └── BorrowService.cs                     # Оркестрація позичень
 │
-├── LibraryManagementSystem.Infrastructure/  # Data access implementations
-│   ├── InMemoryPatronRepository.cs          # In-memory patron storage
-│   ├── InMemoryBookRepository.cs            # In-memory book storage
-│   └── InMemoryBorrowRepository.cs          # In-memory borrow record storage
+├── LibraryManagementSystem.Infrastructure/  # Реалізації доступу до даних
+│   ├── InMemoryPatronRepository.cs          # In-memory зберігання відвідувачів
+│   ├── InMemoryBookRepository.cs            # In-memory зберігання книг
+│   └── InMemoryBorrowRepository.cs          # In-memory зберігання записів позичень
 │
-└── LibraryManagementSystem.Console/         # User interface
-    └── Program.cs                           # Main console application
+└── LibraryManagementSystem.Console/         # Інтерфейс користувача
+    └── Program.cs                           # Основний консольний додаток
 
 tests/
-└── LibraryManagementSystem.Tests/           # Unit tests
-    ├── DomainModelTests.cs                  # Domain entity tests
-    └── ServiceTests.cs                      # Service layer tests
+└── LibraryManagementSystem.Tests/           # Модульні тести
+    ├── DomainModelTests.cs                  # Тести сутностей домену
+    └── ServiceTests.cs                      # Тести шару сервісів
 ```
 
-## Key Features
+## Ключові Функції
 
-### Iteration 1 (Lab 34)
+### Ітерація 1 (Lab 34)
 
-**Vertical Slice: Register Patron → Borrow Book → Return Book**
+**Вертикальний Зріз: Реєстрація Відвідувача → Позичення Книги → Повернення Книги**
 
-1. **Domain Layer**
-   - 5+ domain entities (Book, Copy, Patron, BorrowRecord, OverduePolicy)
-   - Input validation in constructors
-   - Business rule enforcement
-   - Encapsulated properties
+1. **Шар Домену**
+   - 5+ сутностей домену (Book, Copy, Patron, BorrowRecord, OverduePolicy)
+   - Валідація входів в конструкторах
+   - Забезпечення бізнес-правил
+   - Інкапсульовані властивості
 
-2. **Application Layer**
-   - Three main services (PatronService, BookService, BorrowService)
-   - Dependency injection through constructors
-   - Orchestration of complex operations
+2. **Шар Застосунку**
+   - Три основних сервіси (PatronService, BookService, BorrowService)
+   - Ін'єкція залежностей через конструктори
+   - Оркестрація складних операцій
 
-3. **Infrastructure Layer**
-   - Repository pattern implementation
-   - In-memory data persistence
-   - Prepared for SQL implementation in Lab 35
+3. **Шар Інфраструктури**
+   - Реалізація патерну репозиторій
+   - In-memory персистентність даних
+   - Підготовлено для реалізації SQL в Lab 35
 
-4. **Console UI**
-   - Interactive menu-driven interface
-   - Complete scenario walkthroughs
-   - Error handling and user feedback
+4. **Консольний Інтерфейс**
+   - Інтерактивний інтерфейс з меню
+   - Повні сценарії проходження
+   - Обробка помилок та зворотній зв'язок з користувачем
 
-5. **Testing**
-   - 15+ unit tests covering domain logic
-   - Service layer integration tests
-   - Repository pattern validation
+5. **Тестування**
+   - 15+ модульних тестів, що покривають логіку домену
+   - Інтеграційні тести шару сервісів
+   - Валідація патерну репозиторій
 
-## Getting Started
+## Початок Роботи
 
-### Prerequisites
+### Передумови
 
-- .NET 6.0 SDK or later
+- .NET 6.0 SDK або пізніша версія
 - Git
 
-### Installation
+### Встановлення
 
 ```bash
-# Clone the repository
+# Клонувати репозиторій
 git clone https://github.com/yourusername/OOP-MiniProject-Vakuluik.git
 cd OOP-MiniProject-Vakuluik
 
-# Restore dependencies
+# Відновити залежності
 dotnet restore
 
-# Build the solution
+# Зібрати рішення
 dotnet build
 ```
 
-### Running the Application
+### Запуск Додатку
 
 ```bash
-# Run the console application
+# Запустити консольний додаток
 dotnet run --project src/LibraryManagementSystem.Console
 ```
 
-### Running Tests
+### Запуск Тестів
 
 ```bash
-# Run all tests
+# Запустити всі тести
 dotnet test
 
-# Run tests with coverage
+# Запустити тести з покриттям
 dotnet test /p:CollectCoverage=true
 ```
 
-## Usage Example
+## Приклад Використання
 
-### Main Workflow
+### Основний Робочий Процес
 
-1. **Start Application**: Run the console app
-2. **Register Patron**: Use menu option 1
-3. **Register Book**: Use menu option 3 (sample books pre-loaded)
-4. **Borrow Book**: Use menu option 5
-   - Enter patron ID
-   - Enter book ISBN
-   - System creates borrow record with 30-day due date
-5. **Return Book**: Use menu option 6
-   - Enter borrow ID
-   - System calculates overdue fees if applicable
-   - Copy is marked as available
+1. **Запуск Додатку**: Запустити консольний додаток
+2. **Реєстрація Відвідувача**: Використати опцію меню 1
+3. **Реєстрація Книги**: Використати опцію меню 3 (зразки книг попередньо завантажені)
+4. **Позичення Книги**: Використати опцію меню 5
+   - Ввести ID відвідувача
+   - Ввести ISBN книги
+   - Система створює запис позичення з терміном 30 днів
+5. **Повернення Книги**: Використати опцію меню 6
+   - Ввести ID позичення
+   - Система розраховує штрафи за прострочення, якщо застосовується
+   - Копія позначається як доступна
 
-## Design Patterns Implemented
+## Реалізовані Патерни Проектування
 
-1. **Repository Pattern** - Abstraction of data access logic
-2. **Service Pattern** - Encapsulation of business logic
-3. **Dependency Injection** - Loose coupling between layers
-4. **Entity & Value Object** - Clear distinction between mutable and immutable data
-5. **Policy Pattern** - OverduePolicy for business rules
-6. **Factory** - ID generation patterns in services
+1. **Паттерн Репозиторій** - Абстракція логіки доступу до даних
+2. **Паттерн Сервіс** - Інкапсуляція бізнес-логіки
+3. **Ін'єкція Залежностей** - Роз'єднання між шарами
+4. **Сутність та Об'єкт Значення** - Чітке розрізнення між змінюваними та незмінними даними
+5. **Паттерн Політика** - OverduePolicy для бізнес-правил
+6. **Фабрика** - Патерни генерації ID в сервісах
 
-## SOLID Principles Applied
+## Застосовані Принципи SOLID
 
-- **S** (Single Responsibility): Each class has one reason to change
-- **O** (Open/Closed): Open for extension (new services), closed for modification
-- **L** (Liskov Substitution): Repository implementations are interchangeable
-- **I** (Interface Segregation): Separate repository interfaces for different concerns
-- **D** (Dependency Inversion): Depends on abstractions, not concrete implementations
+- **S** (Єдина Відповідальність): Кожен клас має одну причину для зміни
+- **O** (Відкритий/Закритий): Відкритий для розширення (нові сервіси), закритий для модифікації
+- **L** (Підстановка Лісков): Реалізації репозиторіїв взаємозамінні
+- **I** (Розділення Інтерфейсів): Окремі інтерфейси репозиторіїв для різних проблем
+- **D** (Інверсія Залежностей): Залежить від абстракцій, а не від конкретних реалізацій
 
-## Code Quality
+## Якість Коду
 
-- **Clean Code**: Clear naming, small methods, no deep nesting
-- **Encapsulation**: Private fields with property access where needed
-- **Validation**: Input validation in constructors and services
-- **Error Handling**: Explicit exception throwing with descriptive messages
-- **Documentation**: XML comments for public APIs
+- **Чистий Код**: Чіткі назви, малі методи, відсутність глибокого вкладення
+- **Інкапсуляція**: Приватні поля з доступом через властивості де потрібно
+- **Валідація**: Валідація входів в конструкторах та сервісах
+- **Обробка Помилок**: Явне викидання виключень з описовими повідомленнями
+- **Документація**: XML коментарі для публічних API
 
-## Current Limitations (Iteration 1 Scope)
+## Поточні Обмеження (Обсяг Ітерації 1)
 
-- **In-memory storage only** (will add SQL in Lab 35)
-- **No authentication/authorization** (future feature)
-- **No web API** (planned for future)
-- **Basic console UI** (web UI planned for Lab 37)
-- **No advanced queries** (filtering, sorting in Lab 35)
+- **Тільки in-memory зберігання** (додамо SQL в Lab 35)
+- **Відсутня аутентифікація/авторизація** (майбутня функція)
+- **Відсутній веб API** (планується в майбутньому)
+- **Базовий консольний інтерфейс** (веб інтерфейс планується для Lab 37)
+- **Відсутні розширені запити** (фільтрація, сортування в Lab 35)
 
-## Future Enhancements (Lab 35-37)
+## Майбутні Покращення (Lab 35-37)
 
-- SQL Server persistence layer
-- Advanced search and filtering
-- Book reservations system
-- Email notifications
-- REST API implementation
-- Web UI (ASP.NET Core)
-- Mobile app
-- Analytics dashboard
+- Шар персистентності SQL Server
+- Розширений пошук та фільтрація
+- Система бронювання книг
+- Email повідомлення
+- Реалізація REST API
+- Веб інтерфейс (ASP.NET Core)
+- Мобільний додаток
+- Аналітична панель
 
-## Project Structure Requirements Met
+## Відповідність Вимогам Структури Проекту
 
-- [x] `docs/vision.md` - Problem statement and requirements
-- [x] `docs/backlog.md` - Iteration planning
-- [x] `docs/class-diagram.md` - UML class diagram with Mermaid
-- [x] `docs/sequence-diagram.md` - Sequence diagram for main scenario
-- [x] Solution with 5 projects (Domain, Application, Infrastructure, Console, Tests)
-- [x] Domain layer with 5+ entities and business rules
-- [x] Repository pattern with in-memory implementations
-- [x] Working vertical slice (register → borrow → return)
-- [x] 15+ unit tests
-- [x] GitHub Actions CI/CD workflow
-- [x] README with setup instructions
-- [x] `.gitignore` for .NET projects
+- [x] `docs/vision.md` - Постановка проблеми та вимоги
+- [x] `docs/backlog.md` - Планування ітерацій
+- [x] `docs/class-diagram.md` - UML діаграма класів з Mermaid
+- [x] `docs/sequence-diagram.md` - Діаграма послідовності для основного сценарію
+- [x] Рішення з 5 проектами (Domain, Application, Infrastructure, Console, Tests)
+- [x] Шар домену з 5+ сутностями та бізнес-правилами
+- [x] Паттерн репозиторій з in-memory реалізаціями
+- [x] Робочий вертикальний зріз (реєстрація → позичення → повернення)
+- [x] 15+ модульних тестів
+- [x] Робочий процес GitHub Actions CI/CD
+- [x] README з інструкціями налаштування
+- [x] `.gitignore` для проектів .NET
 
-## Testing
+## Тестування
 
-The project includes comprehensive unit tests:
+Проект включає комплексні модульні тести:
 
 ```bash
-# Run specific test class
+# Запустити конкретний клас тестів
 dotnet test --filter "FullyQualifiedName~DomainModelTests"
 
-# Run specific test method
+# Запустити конкретний метод тесту
 dotnet test --filter "Name~Book_Constructor_WithValidData_CreatesBook"
 ```
 
-## CI/CD Pipeline
+## Конвеєр CI/CD
 
-The GitHub Actions workflow automatically:
-1. Restores NuGet packages
-2. Builds the solution
-3. Runs all unit tests on every push to main or develop branches
+Робочий процес GitHub Actions автоматично:
+1. Відновлює пакети NuGet
+2. Збирає рішення
+3. Запускає всі модульні тести при кожному push до гілок main або develop
 
-## Contributing
+## Співробітництво
 
-This is an educational project for learning purposes. See `docs/iteration-1.md` for current status and known limitations.
+Це освітній проект для навчальних цілей. Дивіться `docs/iteration-1.md` для поточного статусу та відомих обмежень.
 
-## License
+## Ліцензія
 
-This project is created for educational purposes in the OOP Mini-Project course.
+Цей проект створений для освітніх цілей в курсі міні-проекту ООП.
 
-## Contact & Support
+## Контакти та Підтримка
 
-For questions or issues, refer to the lab documentation or course materials.
+Для питань або проблем звертайтеся до лабораторної документації або матеріалів курсу.
 
 ---
 
-**Status**: Lab 34 (Iteration 1) - Foundation Complete
-**Next**: Lab 35 (Iteration 2) - Data Persistence & Advanced Features
+**Статус**: Lab 34 (Ітерація 1) - Основа Завершена
+**Далі**: Lab 35 (Ітерація 2) - Персистентність Даних та Розширені Функції
