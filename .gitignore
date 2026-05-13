@@ -1,0 +1,92 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options directory
+.vs/
+
+# Rider IDE
+.idea/
+*.sln.iml
+*.swp
+*.swo
+
+# Build folder
+artifacts/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Local History for Visual Studio
+.localhistory/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# NuGet packages
+*.nupkg
+*.snupkg
+*.nupkg.metadata
+*.nuspec
+
+# NuGet Lock files
+packages.lock.json
+
+# Publishing artifacts
+PublishProfiles/
+*.publish.xml
+*.pubxml
+
+# ASP.NET Core
+wwwroot/
+
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+
+# Test Explorer settings
+.testSettings
+
+# dotTrace
+*.nettrace
+*.netcore
+
+# dotMemory
+*.ndy
+
+# dotCover
+.dotCover/
+
+# Rider
+.idea/
+*.sln.iml
+*.run.xml
+
+# Mac
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+
+# Coverage reports
+coverage/
+opencoverage/
