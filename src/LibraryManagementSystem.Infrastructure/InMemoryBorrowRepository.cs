@@ -32,9 +32,19 @@ public class InMemoryBorrowRepository : IBorrowRepository
         return _borrowsDb.TryGetValue(borrowId, out var record) ? record : null;
     }
 
-    public List<BorrowRecord> GetAll()
+    public IReadOnlyCollection<BorrowRecord> GetAll()
     {
         return _borrowsDb.Values.ToList();
+    }
+
+    public void Delete(string borrowId)
+    {
+        if (string.IsNullOrWhiteSpace(borrowId))
+        {
+            throw new ArgumentException("Borrow ID cannot be empty", nameof(borrowId));
+        }
+
+        _borrowsDb.Remove(borrowId);
     }
 
     public List<BorrowRecord> GetByPatronId(string patronId)

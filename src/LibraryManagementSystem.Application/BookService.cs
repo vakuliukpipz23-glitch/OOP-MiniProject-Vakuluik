@@ -39,7 +39,7 @@ public class BookService
 
     public List<Book> GetAllBooks()
     {
-        return _bookRepository.GetAll();
+        return _bookRepository.GetAll().ToList();
     }
 
     public List<Book> GetAvailableBooks()
@@ -56,6 +56,17 @@ public class BookService
     {
         var copies = _bookRepository.GetCopiesByIsbn(isbn);
         return copies.Count(c => c.Status == CopyStatus.Available);
+    }
+
+    public void UpdateBookCategory(string isbn, string category)
+    {
+        var book = _bookRepository.GetByIsbn(isbn);
+        if (book is null)
+        {
+            throw new InvalidOperationException($"Book with ISBN {isbn} not found");
+        }
+
+        book.UpdateCategory(category);
     }
 
     public List<Copy> GetCopies(string isbn)

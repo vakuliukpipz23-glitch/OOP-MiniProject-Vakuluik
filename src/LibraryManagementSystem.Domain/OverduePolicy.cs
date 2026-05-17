@@ -1,6 +1,6 @@
 namespace LibraryManagementSystem.Domain;
 
-public class OverduePolicy
+public class OverduePolicy : IOverduePolicy
 {
     public decimal FeePerDay { get; }
     public int GracePeriodDays { get; }

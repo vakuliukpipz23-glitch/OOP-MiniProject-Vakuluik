@@ -32,7 +32,7 @@ public class InMemoryPatronRepository : IPatronRepository
         return _patronsDb.TryGetValue(patronId, out var patron) ? patron : null;
     }
 
-    public List<Patron> GetAll()
+    public IReadOnlyCollection<Patron> GetAll()
     {
         return _patronsDb.Values.ToList();
     }
@@ -50,5 +50,15 @@ public class InMemoryPatronRepository : IPatronRepository
         }
 
         _patronsDb[patron.PatronId] = patron;
+    }
+
+    public void Delete(string patronId)
+    {
+        if (string.IsNullOrWhiteSpace(patronId))
+        {
+            throw new ArgumentException("Patron ID cannot be empty", nameof(patronId));
+        }
+
+        _patronsDb.Remove(patronId);
     }
 }
