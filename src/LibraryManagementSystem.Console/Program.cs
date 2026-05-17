@@ -2,6 +2,8 @@
 using LibraryManagementSystem.Domain;
 using LibraryManagementSystem.Infrastructure;
 
+const string LibraryDataFile = "data/library.json";
+
 var patronRepo = new InMemoryPatronRepository();
 var bookRepo = new InMemoryBookRepository();
 var borrowRepo = new InMemoryBorrowRepository();
@@ -9,8 +11,11 @@ var borrowRepo = new InMemoryBorrowRepository();
 var patronService = new PatronService(patronRepo);
 var bookService = new BookService(bookRepo);
 var borrowService = new BorrowService(borrowRepo, patronRepo, bookRepo);
+var queryService = new LibraryQueryService(bookRepo, borrowRepo);
 
-InitializeWithSampleData(bookService);
+var persistenceService = new LibraryPersistenceService(new JsonFileDataStore<LibrarySnapshot>(LibraryDataFile));
+await LoadLibraryStateAsync(persistenceService, patronRepo, bookRepo, borrowRepo);
+EnsureSampleDataExists(bookService);
 
 while (true)
 {
@@ -22,7 +27,12 @@ while (true)
     Console.WriteLine("5. Borrow a Book");
     Console.WriteLine("6. Return a Book");
     Console.WriteLine("7. View Patron's Borrows");
-    Console.WriteLine("8. Exit");
+    Console.WriteLine("8. Search Books");
+    Console.WriteLine("9. Analytics & Reports");
+    Console.WriteLine("10. Update Patron Contact");
+    Console.WriteLine("11. Update Book Category");
+    Console.WriteLine("12. Save Library State");
+    Console.WriteLine("13. Exit");
     Console.Write("Choose option: ");
 
     string? option = Console.ReadLine();
@@ -53,6 +63,22 @@ while (true)
                 ViewPatronBorrows(borrowService, patronService);
                 break;
             case "8":
+                SearchBooks(queryService);
+                break;
+            case "9":
+                ShowAnalytics(queryService, patronService, bookService);
+                break;
+            case "10":
+                UpdatePatronContact(patronService);
+                break;
+            case "11":
+                UpdateBookCategory(bookService);
+                break;
+            case "12":
+                await SaveLibraryStateAsync(persistenceService, bookRepo, patronRepo, borrowRepo);
+                break;
+            case "13":
+                await SaveLibraryStateAsync(persistenceService, bookRepo, patronRepo, borrowRepo);
                 Console.WriteLine("Thank you for using Library Management System!");
                 return;
             default:
@@ -65,6 +91,48 @@ while (true)
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"Error: {ex.Message}");
         Console.ResetColor();
+    }
+}
+
+static async Task LoadLibraryStateAsync(LibraryPersistenceService persistenceService, InMemoryPatronRepository patronRepo, InMemoryBookRepository bookRepo, InMemoryBorrowRepository borrowRepo)
+{
+    try
+    {
+        var snapshot = await persistenceService.LoadAsync();
+        if (snapshot is not null)
+        {
+            persistenceService.RestoreState(snapshot, patronRepo, bookRepo, borrowRepo);
+            Console.WriteLine("Library state loaded successfully.");
+        }
+        else
+        {
+            Console.WriteLine("No saved library state found. Starting with fresh state.");
+        }
+    }
+    catch
+    {
+        Console.WriteLine("Failed to load saved library state. Starting with fresh state.");
+    }
+}
+
+static async Task SaveLibraryStateAsync(LibraryPersistenceService persistenceService, InMemoryBookRepository bookRepo, InMemoryPatronRepository patronRepo, InMemoryBorrowRepository borrowRepo)
+{
+    var allBooks = bookRepo.GetAll();
+    var allCopies = bookRepo.GetAllCopies();
+    var allPatrons = patronRepo.GetAll();
+    var allBorrowRecords = borrowRepo.GetAll();
+
+    await persistenceService.SaveAsync(allBooks, allCopies, allPatrons, allBorrowRecords);
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Library state saved successfully.");
+    Console.ResetColor();
+}
+
+static void EnsureSampleDataExists(BookService bookService)
+{
+    if (!bookService.GetAllBooks().Any())
+    {
+        InitializeWithSampleData(bookService);
     }
 }
 
@@ -99,7 +167,7 @@ static void ListPatrons(PatronService patronService)
     Console.WriteLine("\n=== Registered Patrons ===");
     foreach (var patron in patrons)
     {
-        Console.WriteLine($"ID: {patron.PatronId} | Name: {patron.Name} | Email: {patron.Email}");
+        Console.WriteLine($"ID: {patron.PatronId} | Name: {patron.Name} | Email: {patron.Email} | Phone: {patron.Phone}");
     }
 }
 
@@ -260,6 +328,94 @@ static void ViewPatronBorrows(BorrowService borrowService, PatronService patronS
         }
         Console.WriteLine();
     }
+}
+
+static void SearchBooks(LibraryQueryService queryService)
+{
+    Console.Write("Enter search term: ");
+    string? query = Console.ReadLine();
+    if (string.IsNullOrWhiteSpace(query))
+    {
+        Console.WriteLine("Please enter a valid search term.");
+        return;
+    }
+
+    var results = queryService.SearchBooks(query!);
+    if (!results.Any())
+    {
+        Console.WriteLine("No books found matching the search criteria.");
+        return;
+    }
+
+    Console.WriteLine($"\n=== Search Results ({results.Count}) ===");
+    foreach (var book in results)
+    {
+        Console.WriteLine($"ISBN: {book.ISBN} | {book.Title} by {book.Author} | Category: {book.Category}");
+    }
+}
+
+static void ShowAnalytics(LibraryQueryService queryService, PatronService patronService, BookService bookService)
+{
+    Console.WriteLine("\n=== Library Analytics & Reports ===");
+
+    var activeBorrows = queryService.GetActiveBorrowRecords();
+    Console.WriteLine($"Active borrows: {activeBorrows.Count}");
+
+    var overdueBorrows = queryService.GetOverdueBorrows();
+    Console.WriteLine($"Overdue borrows: {overdueBorrows.Count}");
+
+    var topBooks = queryService.GetTopBorrowedBooks(5);
+    Console.WriteLine("Top borrowed books:");
+    foreach (var (book, count) in topBooks)
+    {
+        Console.WriteLine($"- {book.Title} by {book.Author} (ISBN: {book.ISBN}) - Borrow count: {count}");
+    }
+
+    Console.Write("Enter patron ID for debt summary (optional): ");
+    string? patronId = Console.ReadLine();
+    if (!string.IsNullOrWhiteSpace(patronId))
+    {
+        var patron = patronService.GetPatron(patronId!);
+        if (patron is not null)
+        {
+            Console.WriteLine($"Patron {patron.Name} owes {patron.GetTotalOverdueFeesOwed():C}");
+        }
+        else
+        {
+            Console.WriteLine($"Patron {patronId} not found.");
+        }
+    }
+}
+
+static void UpdatePatronContact(PatronService patronService)
+{
+    Console.Write("Enter patron ID: ");
+    string? patronId = Console.ReadLine();
+
+    Console.Write("Enter new email: ");
+    string? email = Console.ReadLine();
+
+    Console.Write("Enter new phone: ");
+    string? phone = Console.ReadLine();
+
+    patronService.UpdatePatronContact(patronId!, email!, phone!);
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Patron contact updated successfully.");
+    Console.ResetColor();
+}
+
+static void UpdateBookCategory(BookService bookService)
+{
+    Console.Write("Enter book ISBN: ");
+    string? isbn = Console.ReadLine();
+
+    Console.Write("Enter new category: ");
+    string? category = Console.ReadLine();
+
+    bookService.UpdateBookCategory(isbn!, category!);
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Book category updated successfully.");
+    Console.ResetColor();
 }
 
 static void InitializeWithSampleData(BookService bookService)

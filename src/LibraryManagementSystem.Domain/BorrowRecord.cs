@@ -5,12 +5,12 @@ public class BorrowRecord
     public string BorrowId { get; }
     public Patron Patron { get; }
     public Copy Copy { get; }
-    public DateTime BorrowDate { get; }
-    public DateTime DueDate { get; }
+    public DateTime BorrowDate { get; private set; }
+    public DateTime DueDate { get; private set; }
     public DateTime? ReturnDate { get; private set; }
     public decimal OverdueFee { get; private set; }
 
-    public BorrowRecord(string borrowId, Patron patron, Copy copy, OverduePolicy policy)
+    public BorrowRecord(string borrowId, Patron patron, Copy copy, IOverduePolicy policy)
     {
         ValidateBorrowId(borrowId);
         ValidatePatron(patron);
@@ -61,11 +61,53 @@ public class BorrowRecord
         return (int)(checkDate - DueDate).TotalDays;
     }
 
-    public decimal CalculateOverdueFee(OverduePolicy policy)
+    public decimal CalculateOverdueFee(IOverduePolicy policy)
     {
         int daysLate = GetDaysOverdue();
         OverdueFee = policy.CalculateFee(daysLate);
         return OverdueFee;
+    }
+
+    private BorrowRecord(string borrowId, Patron patron, Copy copy, DateTime borrowDate, DateTime dueDate, DateTime? returnDate, decimal overdueFee)
+    {
+        ValidateBorrowId(borrowId);
+        ValidatePatron(patron);
+        ValidateCopy(copy);
+
+        BorrowId = borrowId;
+        Patron = patron;
+        Copy = copy;
+        BorrowDate = borrowDate;
+        DueDate = dueDate;
+        ReturnDate = returnDate;
+        OverdueFee = overdueFee;
+
+        if (!ReturnDate.HasValue && copy.Status == CopyStatus.Available)
+        {
+            copy.MarkAsBorrowed();
+        }
+
+        Patron.AddBorrowRecord(this);
+    }
+
+    public static BorrowRecord Rehydrate(string borrowId, Patron patron, Copy copy, DateTime borrowDate, DateTime dueDate, DateTime? returnDate, decimal overdueFee)
+    {
+        if (string.IsNullOrWhiteSpace(borrowId))
+        {
+            throw new ArgumentException("Borrow ID cannot be empty", nameof(borrowId));
+        }
+
+        if (borrowDate == default)
+        {
+            throw new ArgumentException("Borrow date cannot be empty", nameof(borrowDate));
+        }
+
+        if (dueDate == default)
+        {
+            throw new ArgumentException("Due date cannot be empty", nameof(dueDate));
+        }
+
+        return new BorrowRecord(borrowId, patron, copy, borrowDate, dueDate, returnDate, overdueFee);
     }
 
     private static void ValidateBorrowId(string borrowId)
@@ -97,7 +139,7 @@ public class BorrowRecord
         }
     }
 
-    private static void ValidatePolicy(OverduePolicy? policy)
+    private static void ValidatePolicy(IOverduePolicy? policy)
     {
         if (policy is null)
         {

@@ -6,12 +6,17 @@ public class Patron
 
     public string PatronId { get; }
     public string Name { get; }
-    public string Email { get; }
-    public string Phone { get; }
-    public DateTime RegistrationDate { get; }
+    public string Email { get; private set; }
+    public string Phone { get; private set; }
+    public DateTime RegistrationDate { get; private set; }
     public IReadOnlyList<BorrowRecord> BorrowHistory => _borrowHistory.AsReadOnly();
 
     public Patron(string patronId, string name, string email, string phone)
+        : this(patronId, name, email, phone, DateTime.UtcNow)
+    {
+    }
+
+    public Patron(string patronId, string name, string email, string phone, DateTime registrationDate)
     {
         ValidatePatronId(patronId);
         ValidateName(name);
@@ -22,7 +27,7 @@ public class Patron
         Name = name;
         Email = email;
         Phone = phone;
-        RegistrationDate = DateTime.UtcNow;
+        RegistrationDate = registrationDate;
     }
 
     public void AddBorrowRecord(BorrowRecord record)
@@ -33,6 +38,15 @@ public class Patron
         }
 
         _borrowHistory.Add(record);
+    }
+
+    public void UpdateContact(string email, string phone)
+    {
+        ValidateEmail(email);
+        ValidatePhone(phone);
+
+        Email = email;
+        Phone = phone;
     }
 
     public List<BorrowRecord> GetActiveBorrows()

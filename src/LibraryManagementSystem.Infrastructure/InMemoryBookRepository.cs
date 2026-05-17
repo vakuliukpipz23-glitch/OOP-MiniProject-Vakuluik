@@ -35,7 +35,7 @@ public class InMemoryBookRepository : IBookRepository
         return _booksDb.TryGetValue(isbn, out var book) ? book : null;
     }
 
-    public List<Book> GetAll()
+    public IReadOnlyCollection<Book> GetAll()
     {
         return _booksDb.Values.ToList();
     }
@@ -53,6 +53,30 @@ public class InMemoryBookRepository : IBookRepository
         }
 
         _booksDb[book.ISBN] = book;
+    }
+
+    public Book? GetById(string id)
+    {
+        return GetByIsbn(id);
+    }
+
+    public void Delete(string isbn)
+    {
+        if (string.IsNullOrWhiteSpace(isbn))
+        {
+            throw new ArgumentException("ISBN cannot be empty", nameof(isbn));
+        }
+
+        _booksDb.Remove(isbn);
+        var copyIds = _copiesDb.Values
+            .Where(c => c.Book.ISBN == isbn)
+            .Select(c => c.CopyId)
+            .ToList();
+
+        foreach (var copyId in copyIds)
+        {
+            _copiesDb.Remove(copyId);
+        }
     }
 
     public void AddCopy(Copy copy)
@@ -90,6 +114,11 @@ public class InMemoryBookRepository : IBookRepository
         }
 
         return _copiesDb.TryGetValue(copyId, out var copy) ? copy : null;
+    }
+
+    public List<Copy> GetAllCopies()
+    {
+        return _copiesDb.Values.ToList();
     }
 
     public void UpdateCopy(Copy copy)

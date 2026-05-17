@@ -8,13 +8,14 @@ public class BorrowService
     private readonly IBorrowRepository _borrowRepository;
     private readonly IPatronRepository _patronRepository;
     private readonly IBookRepository _bookRepository;
-    private readonly OverduePolicy _overduePolicy;
+    private readonly IOverduePolicy _overduePolicy;
+    private const decimal MaxAllowedDebt = 0m;
 
     public BorrowService(
         IBorrowRepository borrowRepository,
         IPatronRepository patronRepository,
         IBookRepository bookRepository,
-        OverduePolicy? overduePolicy = null)
+        IOverduePolicy? overduePolicy = null)
     {
         _borrowRepository = borrowRepository ?? throw new ArgumentNullException(nameof(borrowRepository));
         _patronRepository = patronRepository ?? throw new ArgumentNullException(nameof(patronRepository));
@@ -28,6 +29,13 @@ public class BorrowService
         if (patron is null)
         {
             throw new InvalidOperationException($"Patron {patronId} not found");
+        }
+
+        var outstandingDebt = GetPatronTotalDebts(patronId);
+        if (outstandingDebt > MaxAllowedDebt)
+        {
+            throw new InvalidOperationException(
+                $"Patron {patronId} has overdue fees of {outstandingDebt:C} and cannot borrow new books until the debt is cleared.");
         }
 
         var book = _bookRepository.GetByIsbn(isbn);
@@ -108,7 +116,7 @@ public class BorrowService
 
     public List<BorrowRecord> GetAllBorrows()
     {
-        return _borrowRepository.GetAll();
+        return _borrowRepository.GetAll().ToList();
     }
 
     private Copy? GetAvailableCopy(string isbn)

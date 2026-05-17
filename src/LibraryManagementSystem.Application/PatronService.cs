@@ -31,9 +31,20 @@ public class PatronService
         return _patronRepository.GetById(patronId);
     }
 
+    public void UpdatePatronContact(string patronId, string email, string phone)
+    {
+        var patron = _patronRepository.GetById(patronId);
+        if (patron is null)
+        {
+            throw new InvalidOperationException($"Patron {patronId} not found");
+        }
+
+        patron.UpdateContact(email, phone);
+    }
+
     public List<Patron> GetAllPatrons()
     {
-        return _patronRepository.GetAll();
+        return _patronRepository.GetAll().ToList();
     }
 
     public List<BorrowRecord> GetPatronBorrows(string patronId)

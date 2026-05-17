@@ -5,7 +5,7 @@ public class Book
     public string ISBN { get; }
     public string Title { get; }
     public string Author { get; }
-    public string Category { get; }
+    public string Category { get; private set; }
     public int TotalCopies { get; private set; }
 
     public Book(string isbn, string title, string author, string category, int totalCopies)
@@ -65,6 +65,12 @@ public class Book
     public override bool Equals(object? obj)
     {
         return obj is Book book && ISBN == book.ISBN;
+    }
+
+    public void UpdateCategory(string category)
+    {
+        ValidateInput(category, nameof(category));
+        Category = category;
     }
 
     public override int GetHashCode()
