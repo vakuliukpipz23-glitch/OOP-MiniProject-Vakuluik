@@ -3,7 +3,7 @@ using LibraryManagementSystem.Domain.Repositories;
 
 namespace LibraryManagementSystem.Infrastructure;
 
-public class LibraryPersistenceService
+public class LibraryPersistenceService : ILibraryPersistenceService
 {
     private readonly IDataStore<LibrarySnapshot> _dataStore;
 

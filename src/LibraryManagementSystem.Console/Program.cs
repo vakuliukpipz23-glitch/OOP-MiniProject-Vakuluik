@@ -79,17 +79,17 @@ while (true)
                 break;
             case "13":
                 await SaveLibraryStateAsync(persistenceService, bookRepo, patronRepo, borrowRepo);
-                Console.WriteLine("Thank you for using Library Management System!");
+                Console.WriteLine("Дякуємо за використання Системи Управління Бібліотекою!");
                 return;
             default:
-                Console.WriteLine("Invalid option. Please try again.");
+                Console.WriteLine("Невірна опція. Спробуйте ще раз.");
                 break;
         }
     }
     catch (Exception ex)
     {
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"Error: {ex.Message}");
+        Console.WriteLine($"Помилка: {ex.Message}");
         Console.ResetColor();
     }
 }
@@ -179,16 +179,16 @@ static void RegisterBook(BookService bookService)
     Console.Write("Enter title: ");
     string? title = Console.ReadLine();
 
-    Console.Write("Enter author: ");
+    Console.Write("Введіть автора: ");
     string? author = Console.ReadLine();
 
-    Console.Write("Enter category: ");
+    Console.Write("Введіть категорію: ");
     string? category = Console.ReadLine();
 
-    Console.Write("Enter number of copies: ");
+    Console.Write("Введіть кількість копій: ");
     if (!int.TryParse(Console.ReadLine(), out int copies) || copies <= 0)
     {
-        Console.WriteLine("Invalid number of copies.");
+        Console.WriteLine("Невірна кількість копій.");
         return;
     }
 
@@ -214,7 +214,7 @@ static void ListAvailableBooks(BookService bookService)
     foreach (var book in books)
     {
         int available = bookService.GetAvailableCopiesCount(book.ISBN);
-        Console.WriteLine($"ISBN: {book.ISBN} | {book.Title} by {book.Author} | Category: {book.Category} | Available: {available}");
+        Console.WriteLine($"ISBN: {book.ISBN} | {book.Title} автор {book.Author} | Категорія: {book.Category} | Доступно: {available}");
     }
 }
 
@@ -243,18 +243,18 @@ static void BorrowBook(BorrowService borrowService, PatronService patronService,
     var borrowRecord = borrowService.BorrowBook(patronId!, isbn!);
 
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Book borrowed successfully!");
-    Console.WriteLine($"Patron: {patron.Name}");
-    Console.WriteLine($"Book: {book.Title} by {book.Author}");
-    Console.WriteLine($"Borrow ID: {borrowRecord.BorrowId}");
-    Console.WriteLine($"Borrow Date: {borrowRecord.BorrowDate:yyyy-MM-dd}");
-    Console.WriteLine($"Due Date: {borrowRecord.DueDate:yyyy-MM-dd}");
+    Console.WriteLine("Книгу успішно позичено!");
+    Console.WriteLine($"Відвідувач: {patron.Name}");
+    Console.WriteLine($"Книга: {book.Title} автор {book.Author}");
+    Console.WriteLine($"ID позичення: {borrowRecord.BorrowId}");
+    Console.WriteLine($"Дата позичення: {borrowRecord.BorrowDate:yyyy-MM-dd}");
+    Console.WriteLine($"Термін повернення: {borrowRecord.DueDate:yyyy-MM-dd}");
     Console.ResetColor();
 }
 
 static void ReturnBook(BorrowService borrowService)
 {
-    Console.Write("Enter borrow ID: ");
+    Console.Write("Введіть ID позичення: ");
     string? borrowId = Console.ReadLine();
 
     var borrowRecord = borrowService.GetBorrowRecord(borrowId!);
@@ -274,8 +274,8 @@ static void ReturnBook(BorrowService borrowService)
 
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Book returned successfully!");
-    Console.WriteLine($"Book: {returnedRecord.Copy.Book.Title}");
-    Console.WriteLine($"Patron: {returnedRecord.Patron.Name}");
+    Console.WriteLine($"Книга: {returnedRecord.Copy.Book.Title}");
+    Console.WriteLine($"Відвідувач: {returnedRecord.Patron.Name}");
     Console.WriteLine($"Return Date: {returnedRecord.ReturnDate:yyyy-MM-dd}");
 
     if (returnedRecord.IsOverdue())
@@ -318,7 +318,7 @@ static void ViewPatronBorrows(BorrowService borrowService, PatronService patronS
             ? $"Returned on {record.ReturnDate:yyyy-MM-dd}"
             : (record.IsOverdue() ? "OVERDUE" : $"Due {record.DueDate:yyyy-MM-dd}");
 
-        Console.WriteLine($"Book: {record.Copy.Book.Title}");
+        Console.WriteLine($"Книга: {record.Copy.Book.Title}");
         Console.WriteLine($"Borrowed: {record.BorrowDate:yyyy-MM-dd} | Status: {status}");
         if (record.OverdueFee > 0)
         {
@@ -350,42 +350,42 @@ static void SearchBooks(LibraryQueryService queryService)
     Console.WriteLine($"\n=== Search Results ({results.Count}) ===");
     foreach (var book in results)
     {
-        Console.WriteLine($"ISBN: {book.ISBN} | {book.Title} by {book.Author} | Category: {book.Category}");
+        Console.WriteLine($"ISBN: {book.ISBN} | {book.Title} автор {book.Author} | Категорія: {book.Category}");
     }
 }
 
 static void ShowAnalytics(LibraryQueryService queryService, PatronService patronService, BookService bookService)
 {
-    Console.WriteLine("\n=== Library Analytics & Reports ===");
+    Console.WriteLine("\n=== Аналітика бібліотеки ===");
 
     var activeBorrows = queryService.GetActiveBorrowRecords();
-    Console.WriteLine($"Active borrows: {activeBorrows.Count}");
+    Console.WriteLine($"Активних позичень: {activeBorrows.Count}");
 
     var overdueBorrows = queryService.GetOverdueBorrows();
-    Console.WriteLine($"Overdue borrows: {overdueBorrows.Count}");
+    Console.WriteLine($"Прострочених позичень: {overdueBorrows.Count}");
 
     var overduePatrons = queryService.GetPatronsWithOverdueDebt();
-    Console.WriteLine($"Patrons with overdue debt: {overduePatrons.Count}");
+    Console.WriteLine($"Відвідувачів із заборгованістю: {overduePatrons.Count}");
     foreach (var (patron, debt) in overduePatrons.Take(5))
     {
-        Console.WriteLine($"- {patron.Name} (ID: {patron.PatronId}) owes {debt:C}");
+        Console.WriteLine($"- {patron.Name} (ID: {patron.PatronId}) має заборгованість {debt:C}");
     }
 
     var topBooks = queryService.GetTopBorrowedBooks(5);
-    Console.WriteLine("Top borrowed books:");
+    Console.WriteLine("Топ позичуваних книг:");
     foreach (var (book, count) in topBooks)
     {
-        Console.WriteLine($"- {book.Title} by {book.Author} (ISBN: {book.ISBN}) - Borrow count: {count}");
+        Console.WriteLine($"- {book.Title} автор {book.Author} (ISBN: {book.ISBN}) - кількість позичень: {count}");
     }
 
-    Console.Write("Enter patron ID for debt summary (optional): ");
+    Console.Write("Введіть ID відвідувача для підсумку боргу (необов'язково): ");
     string? patronId = Console.ReadLine();
     if (!string.IsNullOrWhiteSpace(patronId))
     {
         var patron = patronService.GetPatron(patronId!);
         if (patron is not null)
         {
-            Console.WriteLine($"Patron {patron.Name} owes {patron.GetTotalOverdueFeesOwed():C}");
+            Console.WriteLine($"Patron {patron.Name} має заборгованість {patron.GetTotalOverdueFeesOwed():C}");
         }
         else
         {
@@ -416,12 +416,12 @@ static void UpdateBookCategory(BookService bookService)
     Console.Write("Enter book ISBN: ");
     string? isbn = Console.ReadLine();
 
-    Console.Write("Enter new category: ");
+    Console.Write("Введіть нову категорію: ");
     string? category = Console.ReadLine();
 
     bookService.UpdateBookCategory(isbn!, category!);
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Book category updated successfully.");
+    Console.WriteLine("Категорію книги оновлено успішно.");
     Console.ResetColor();
 }
 
@@ -432,10 +432,12 @@ static void InitializeWithSampleData(BookService bookService)
         bookService.RegisterBook("978-0134685991", "Clean Code", "Robert C. Martin", "Programming", 3);
         bookService.RegisterBook("978-0201633610", "Design Patterns", "Gang of Four", "Programming", 2);
         bookService.RegisterBook("978-0201616224", "Refactoring", "Martin Fowler", "Programming", 2);
-        Console.WriteLine("Sample books initialized in the system.\n");
+        Console.WriteLine("Початкові книги успішно додано до системи.\n");
     }
     catch
     {
         // Books already initialized, ignore
     }
 }
+
+
