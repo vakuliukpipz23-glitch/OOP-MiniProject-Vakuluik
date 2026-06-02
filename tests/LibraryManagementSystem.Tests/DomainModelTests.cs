@@ -255,6 +255,6 @@ public class DomainModelTests
         repo.Add(patron1);
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => repo.Add(patron2));
+        Assert.Throws<DuplicateEntityException>(() => repo.Add(patron2));
     }
 }

@@ -13,7 +13,7 @@ var bookService = new BookService(bookRepo);
 var borrowService = new BorrowService(borrowRepo, patronRepo, bookRepo);
 var queryService = new LibraryQueryService(bookRepo, borrowRepo);
 
-var persistenceService = new LibraryPersistenceService(new JsonFileDataStore<LibrarySnapshot>(LibraryDataFile));
+ILibraryPersistenceService persistenceService = new LibraryPersistenceService(new JsonFileDataStore<LibrarySnapshot>(LibraryDataFile));
 await LoadLibraryStateAsync(persistenceService, patronRepo, bookRepo, borrowRepo);
 EnsureSampleDataExists(bookService);
 

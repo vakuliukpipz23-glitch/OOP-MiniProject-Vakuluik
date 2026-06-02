@@ -16,7 +16,7 @@ public class InMemoryPatronRepository : IPatronRepository
 
         if (_patronsDb.ContainsKey(patron.PatronId))
         {
-            throw new InvalidOperationException($"Patron {patron.PatronId} already exists");
+            throw new DuplicateEntityException($"Patron {patron.PatronId} already exists");
         }
 
         _patronsDb[patron.PatronId] = patron;
@@ -46,7 +46,7 @@ public class InMemoryPatronRepository : IPatronRepository
 
         if (!_patronsDb.ContainsKey(patron.PatronId))
         {
-            throw new InvalidOperationException($"Patron {patron.PatronId} not found");
+            throw new EntityNotFoundException($"Patron {patron.PatronId} not found");
         }
 
         _patronsDb[patron.PatronId] = patron;

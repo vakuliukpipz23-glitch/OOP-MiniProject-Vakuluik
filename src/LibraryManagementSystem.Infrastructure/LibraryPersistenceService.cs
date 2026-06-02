@@ -3,7 +3,7 @@ using LibraryManagementSystem.Domain.Repositories;
 
 namespace LibraryManagementSystem.Infrastructure;
 
-public class LibraryPersistenceService
+public class LibraryPersistenceService : ILibraryPersistenceService
 {
     private readonly IDataStore<LibrarySnapshot> _dataStore;
 
@@ -49,7 +49,7 @@ public class LibraryPersistenceService
         {
             if (!books.TryGetValue(copyDto.BookIsbn, out var book))
             {
-                throw new InvalidOperationException($"Cannot restore copy {copyDto.CopyId}: book {copyDto.BookIsbn} missing.");
+                throw new PersistenceRestoreException($"Cannot restore copy {copyDto.CopyId}: book {copyDto.BookIsbn} missing.");
             }
 
             var copy = new Copy(copyDto.CopyId, book);
@@ -70,12 +70,12 @@ public class LibraryPersistenceService
         {
             if (!patrons.TryGetValue(borrowDto.PatronId, out var patron))
             {
-                throw new InvalidOperationException($"Cannot restore borrow record {borrowDto.BorrowId}: patron {borrowDto.PatronId} missing.");
+                throw new PersistenceRestoreException($"Cannot restore borrow record {borrowDto.BorrowId}: patron {borrowDto.PatronId} missing.");
             }
 
             if (!copies.TryGetValue(borrowDto.CopyId, out var copy))
             {
-                throw new InvalidOperationException($"Cannot restore borrow record {borrowDto.BorrowId}: copy {borrowDto.CopyId} missing.");
+                throw new PersistenceRestoreException($"Cannot restore borrow record {borrowDto.BorrowId}: copy {borrowDto.CopyId} missing.");
             }
 
             var borrowRecord = BorrowRecord.Rehydrate(borrowDto.BorrowId, patron, copy, borrowDto.BorrowDate, borrowDto.DueDate, borrowDto.ReturnDate, borrowDto.OverdueFee);

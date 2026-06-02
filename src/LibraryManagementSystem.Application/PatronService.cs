@@ -36,7 +36,7 @@ public class PatronService
         var patron = _patronRepository.GetById(patronId);
         if (patron is null)
         {
-            throw new InvalidOperationException($"Patron {patronId} not found");
+            throw new EntityNotFoundException($"Patron {patronId} not found");
         }
 
         patron.UpdateContact(email, phone);
@@ -52,7 +52,7 @@ public class PatronService
         var patron = _patronRepository.GetById(patronId);
         if (patron is null)
         {
-            throw new InvalidOperationException($"Patron {patronId} not found");
+            throw new EntityNotFoundException($"Patron {patronId} not found");
         }
 
         return patron.GetActiveBorrows();
@@ -63,7 +63,7 @@ public class PatronService
         var patron = _patronRepository.GetById(patronId);
         if (patron is null)
         {
-            throw new InvalidOperationException($"Patron {patronId} not found");
+            throw new EntityNotFoundException($"Patron {patronId} not found");
         }
 
         return patron.GetOverdueBooks();
@@ -74,7 +74,7 @@ public class PatronService
         var patron = _patronRepository.GetById(patronId);
         if (patron is null)
         {
-            throw new InvalidOperationException($"Patron {patronId} not found");
+            throw new EntityNotFoundException($"Patron {patronId} not found");
         }
 
         return patron.GetTotalOverdueFeesOwed();

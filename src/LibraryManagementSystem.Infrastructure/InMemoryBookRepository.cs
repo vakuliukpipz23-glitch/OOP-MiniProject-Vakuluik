@@ -18,7 +18,7 @@ public class InMemoryBookRepository : IBookRepository
 
         if (_booksDb.ContainsKey(book.ISBN))
         {
-            throw new InvalidOperationException($"Book with ISBN {book.ISBN} already exists");
+            throw new DuplicateEntityException($"Book with ISBN {book.ISBN} already exists");
         }
 
         _booksDb[book.ISBN] = book;
@@ -49,7 +49,7 @@ public class InMemoryBookRepository : IBookRepository
 
         if (!_booksDb.ContainsKey(book.ISBN))
         {
-            throw new InvalidOperationException($"Book with ISBN {book.ISBN} not found");
+            throw new EntityNotFoundException($"Book with ISBN {book.ISBN} not found");
         }
 
         _booksDb[book.ISBN] = book;
@@ -88,7 +88,7 @@ public class InMemoryBookRepository : IBookRepository
 
         if (_copiesDb.ContainsKey(copy.CopyId))
         {
-            throw new InvalidOperationException($"Copy {copy.CopyId} already exists");
+            throw new DuplicateEntityException($"Copy {copy.CopyId} already exists");
         }
 
         _copiesDb[copy.CopyId] = copy;
@@ -130,7 +130,7 @@ public class InMemoryBookRepository : IBookRepository
 
         if (!_copiesDb.ContainsKey(copy.CopyId))
         {
-            throw new InvalidOperationException($"Copy {copy.CopyId} not found");
+            throw new EntityNotFoundException($"Copy {copy.CopyId} not found");
         }
 
         _copiesDb[copy.CopyId] = copy;

@@ -28,26 +28,26 @@ public class BorrowService
         var patron = _patronRepository.GetById(patronId);
         if (patron is null)
         {
-            throw new InvalidOperationException($"Patron {patronId} not found");
+            throw new EntityNotFoundException($"Patron {patronId} not found");
         }
 
         var outstandingDebt = GetPatronTotalDebts(patronId);
         if (outstandingDebt > MaxAllowedDebt)
         {
-            throw new InvalidOperationException(
+            throw new BusinessRuleViolationException(
                 $"Patron {patronId} has overdue fees of {outstandingDebt:C} and cannot borrow new books until the debt is cleared.");
         }
 
         var book = _bookRepository.GetByIsbn(isbn);
         if (book is null)
         {
-            throw new InvalidOperationException($"Book with ISBN {isbn} not found");
+            throw new EntityNotFoundException($"Book with ISBN {isbn} not found");
         }
 
         var availableCopy = GetAvailableCopy(isbn);
         if (availableCopy is null)
         {
-            throw new InvalidOperationException(
+            throw new BusinessRuleViolationException(
                 $"No available copies of '{book.Title}' (ISBN: {isbn}). " +
                 $"Total copies: {book.TotalCopies}");
         }
@@ -66,12 +66,12 @@ public class BorrowService
         var borrowRecord = _borrowRepository.GetById(borrowId);
         if (borrowRecord is null)
         {
-            throw new InvalidOperationException($"Borrow record {borrowId} not found");
+            throw new EntityNotFoundException($"Borrow record {borrowId} not found");
         }
 
         if (borrowRecord.ReturnDate.HasValue)
         {
-            throw new InvalidOperationException("This book has already been returned");
+            throw new BusinessRuleViolationException("This book has already been returned");
         }
 
         borrowRecord.ReturnBook();

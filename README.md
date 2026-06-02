@@ -114,8 +114,14 @@ dotnet run --project src/LibraryManagementSystem.Console
 dotnet test
 
 # Запустити тести з покриттям
-dotnet test /p:CollectCoverage=true
+dotnet test --configuration Release --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=opencover /p:CoverletOutput=TestResults/coverage/
 ```
+
+## Документація з тестування
+
+- `docs/test-strategy.md` — загальний тестовий підхід
+- `docs/test-matrix.md` — матриця покриття ключових сценаріїв
+- `TESTING.md` — спосіб запуску та інструкції з покриттям
 
 ## Приклад Використання
 

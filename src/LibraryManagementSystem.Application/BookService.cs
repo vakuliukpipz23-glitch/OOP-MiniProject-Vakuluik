@@ -17,7 +17,7 @@ public class BookService
         var existingBook = _bookRepository.GetByIsbn(isbn);
         if (existingBook is not null)
         {
-            throw new InvalidOperationException($"Book with ISBN {isbn} already exists");
+            throw new DuplicateEntityException($"Book with ISBN {isbn} already exists");
         }
 
         var book = new Book(isbn, title, author, category, totalCopies);
@@ -63,7 +63,7 @@ public class BookService
         var book = _bookRepository.GetByIsbn(isbn);
         if (book is null)
         {
-            throw new InvalidOperationException($"Book with ISBN {isbn} not found");
+            throw new EntityNotFoundException($"Book with ISBN {isbn} not found");
         }
 
         book.UpdateCategory(category);

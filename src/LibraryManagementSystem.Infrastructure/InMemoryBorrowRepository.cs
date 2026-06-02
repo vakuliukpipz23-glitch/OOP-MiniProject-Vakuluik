@@ -16,7 +16,7 @@ public class InMemoryBorrowRepository : IBorrowRepository
 
         if (_borrowsDb.ContainsKey(record.BorrowId))
         {
-            throw new InvalidOperationException($"Borrow record {record.BorrowId} already exists");
+            throw new DuplicateEntityException($"Borrow record {record.BorrowId} already exists");
         }
 
         _borrowsDb[record.BorrowId] = record;
@@ -68,7 +68,7 @@ public class InMemoryBorrowRepository : IBorrowRepository
 
         if (!_borrowsDb.ContainsKey(record.BorrowId))
         {
-            throw new InvalidOperationException($"Borrow record {record.BorrowId} not found");
+            throw new EntityNotFoundException($"Borrow record {record.BorrowId} not found");
         }
 
         _borrowsDb[record.BorrowId] = record;

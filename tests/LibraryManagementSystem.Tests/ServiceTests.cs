@@ -50,7 +50,7 @@ public class BorrowServiceTests
         var service = CreateBorrowService();
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<EntityNotFoundException>(() =>
             service.BorrowBook("NONEXISTENT", "978-0134685991"));
     }
 
@@ -73,7 +73,7 @@ public class BorrowServiceTests
         bookRepo.AddCopy(copy);
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<BusinessRuleViolationException>(() =>
             service.BorrowBook("P001", "978-0134685991"));
     }
 
@@ -125,8 +125,54 @@ public class BorrowServiceTests
         service.ReturnBook(borrowRecord.BorrowId);
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<BusinessRuleViolationException>(() =>
             service.ReturnBook(borrowRecord.BorrowId));
+    }
+
+    [Fact]
+    public void BorrowService_BorrowBook_WithOutstandingDebt_ThrowsBusinessRuleViolationException()
+    {
+        // Arrange
+        var patronRepo = new InMemoryPatronRepository();
+        var bookRepo = new InMemoryBookRepository();
+        var borrowRepo = new InMemoryBorrowRepository();
+        var service = new BorrowService(borrowRepo, patronRepo, bookRepo, new OverduePolicy(feePerDay: 0.50m, gracePeriodDays: 0, maxBorrowDays: 1));
+
+        var patron = new Patron("P001", "John Doe", "john@example.com", "+1234567890");
+        var book = new Book("978-0134685991", "Clean Code", "Robert C. Martin", "Programming", 2);
+        var copy1 = new Copy("COPY-001", book);
+        var copy2 = new Copy("COPY-002", book);
+
+        patronRepo.Add(patron);
+        bookRepo.Add(book);
+        bookRepo.AddCopy(copy1);
+        bookRepo.AddCopy(copy2);
+
+        var overdueBorrow = BorrowRecord.Rehydrate(
+            "B001",
+            patron,
+            copy1,
+            DateTime.UtcNow.AddDays(-14),
+            DateTime.UtcNow.AddDays(-7),
+            null,
+            3.50m);
+
+        borrowRepo.Add(overdueBorrow);
+
+        // Act & Assert
+        Assert.Throws<BusinessRuleViolationException>(() =>
+            service.BorrowBook("P001", "978-0134685991"));
+    }
+
+    [Fact]
+    public void BorrowService_ReturnBook_NonexistentBorrow_ThrowsEntityNotFoundException()
+    {
+        // Arrange
+        var service = CreateBorrowService();
+
+        // Act & Assert
+        Assert.Throws<EntityNotFoundException>(() =>
+            service.ReturnBook("MISSING-BORROW"));
     }
 
     [Fact]
@@ -209,6 +255,18 @@ public class PatronServiceTests
         Assert.NotNull(retrieved);
         Assert.Equal(registered.PatronId, retrieved.PatronId);
     }
+
+    [Fact]
+    public void PatronService_UpdatePatronContact_NonexistentPatron_ThrowsEntityNotFoundException()
+    {
+        // Arrange
+        var repo = new InMemoryPatronRepository();
+        var service = new PatronService(repo);
+
+        // Act & Assert
+        Assert.Throws<EntityNotFoundException>(() =>
+            service.UpdatePatronContact("P999", "new@example.com", "+1234567890"));
+    }
 }
 
 public class BookServiceTests
@@ -231,7 +289,7 @@ public class BookServiceTests
     }
 
     [Fact]
-    public void BookService_RegisterBook_DuplicateISBN_ThrowsException()
+    public void BookService_RegisterBook_DuplicateISBN_ThrowsDuplicateEntityException()
     {
         // Arrange
         var repo = new InMemoryBookRepository();
@@ -240,7 +298,7 @@ public class BookServiceTests
         service.RegisterBook("978-0134685991", "Clean Code", "Robert C. Martin", "Programming", 3);
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<DuplicateEntityException>(() =>
             service.RegisterBook("978-0134685991", "Different Title", "Different Author", "Programming", 1));
     }
 
