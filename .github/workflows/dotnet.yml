@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.x'
     
@@ -27,12 +27,13 @@ jobs:
     - name: Run tests with coverage
       run: |
         dotnet test --no-build --verbosity normal --configuration Release \
-          /p:CollectCoverage=true \
-          /p:CoverletOutputFormat=cobertura \
-          /p:CoverletOutput=TestResults/coverage/
+          --logger "trx;LogFileName=results.trx" \
+          --results-directory tests/LibraryManagementSystem.Tests/TestResults \
+          --collect:"XPlat Code Coverage" \
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
     
     - name: Upload coverage artifact
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report
-        path: tests/LibraryManagementSystem.Tests/TestResults/**/*.xml
+        path: tests/LibraryManagementSystem.Tests/TestResults/
