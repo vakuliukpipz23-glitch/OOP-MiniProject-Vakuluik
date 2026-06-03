@@ -364,6 +364,13 @@ static void ShowAnalytics(LibraryQueryService queryService, PatronService patron
     var overdueBorrows = queryService.GetOverdueBorrows();
     Console.WriteLine($"Overdue borrows: {overdueBorrows.Count}");
 
+    var overduePatrons = queryService.GetPatronsWithOverdueDebt();
+    Console.WriteLine($"Patrons with overdue debt: {overduePatrons.Count}");
+    foreach (var (patron, debt) in overduePatrons.Take(5))
+    {
+        Console.WriteLine($"- {patron.Name} (ID: {patron.PatronId}) owes {debt:C}");
+    }
+
     var topBooks = queryService.GetTopBorrowedBooks(5);
     Console.WriteLine("Top borrowed books:");
     foreach (var (book, count) in topBooks)

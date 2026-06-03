@@ -1,3 +1,4 @@
+using System.IO;
 using LibraryManagementSystem.Application;
 using LibraryManagementSystem.Domain;
 using LibraryManagementSystem.Infrastructure;
@@ -275,5 +276,148 @@ public class BookServiceTests
 
         // Assert
         Assert.Equal(3, count);
+    }
+}
+
+public class QueryServiceTests
+{
+    [Fact]
+    public void LibraryQueryService_GetPatronsWithOverdueDebt_ReturnsOverduePatrons()
+    {
+        // Arrange
+        var bookRepo = new InMemoryBookRepository();
+        var borrowRepo = new InMemoryBorrowRepository();
+        var queryService = new LibraryQueryService(bookRepo, borrowRepo);
+
+        var book = new Book("978-0134685991", "Clean Code", "Robert C. Martin", "Programming", 1);
+        var copy = new Copy("COPY-001", book);
+        var patron = new Patron("P001", "John Doe", "john@example.com", "+1234567890");
+        var pastBorrowDate = DateTime.UtcNow.AddDays(-40);
+        var dueDate = pastBorrowDate.AddDays(30);
+
+        bookRepo.Add(book);
+        bookRepo.AddCopy(copy);
+
+        var overdueBorrow = BorrowRecord.Rehydrate("B001", patron, copy, pastBorrowDate, dueDate, null, 0);
+        borrowRepo.Add(overdueBorrow);
+
+        // Act
+        var overduePatrons = queryService.GetPatronsWithOverdueDebt();
+
+        // Assert
+        Assert.Single(overduePatrons);
+        Assert.Equal("P001", overduePatrons[0].Patron.PatronId);
+        Assert.True(overduePatrons[0].OverdueDebt > 0);
+    }
+}
+
+public class BorrowServiceBusinessRulesTests
+{
+    [Fact]
+    public void BorrowService_BorrowBook_WhenPatronHasOutstandingDebt_ThrowsException()
+    {
+        // Arrange
+        var patronRepo = new InMemoryPatronRepository();
+        var bookRepo = new InMemoryBookRepository();
+        var borrowRepo = new InMemoryBorrowRepository();
+        var service = new BorrowService(borrowRepo, patronRepo, bookRepo);
+
+        var patron = new Patron("P001", "John Doe", "john@example.com", "+1234567890");
+        var book = new Book("978-0134685991", "Clean Code", "Robert C. Martin", "Programming", 1);
+        var copy = new Copy("COPY-001", book);
+        var pastBorrowDate = DateTime.UtcNow.AddDays(-40);
+        var dueDate = pastBorrowDate.AddDays(30);
+
+        bookRepo.Add(book);
+        bookRepo.AddCopy(copy);
+        patronRepo.Add(patron);
+        borrowRepo.Add(BorrowRecord.Rehydrate("B001", patron, copy, pastBorrowDate, dueDate, null, 0));
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => service.BorrowBook("P001", "978-0134685991"));
+    }
+}
+
+public class PersistenceTests
+{
+    [Fact]
+    public async Task JsonFileDataStore_SaveAsyncAndLoadAsync_PersistsSnapshot()
+    {
+        string tempFile = Path.Combine(Path.GetTempPath(), $"library-snapshot-{Guid.NewGuid()}.json");
+
+        try
+        {
+            var dataStore = new JsonFileDataStore<LibrarySnapshot>(tempFile);
+            var snapshot = new LibrarySnapshot(
+                new List<BookDto>(),
+                new List<CopyDto>(),
+                new List<PatronDto>(),
+                new List<BorrowRecordDto>());
+
+            await dataStore.SaveAsync(new[] { snapshot });
+            var loaded = await dataStore.LoadAsync();
+
+            Assert.Single(loaded);
+            Assert.Empty(loaded.First().Books);
+            Assert.Empty(loaded.First().Copies);
+            Assert.Empty(loaded.First().Patrons);
+            Assert.Empty(loaded.First().BorrowRecords);
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task LibraryPersistenceService_SaveAndLoad_RestoresLibraryState()
+    {
+        string tempFile = Path.Combine(Path.GetTempPath(), $"library-state-{Guid.NewGuid()}.json");
+
+        try
+        {
+            var bookRepo = new InMemoryBookRepository();
+            var patronRepo = new InMemoryPatronRepository();
+            var borrowRepo = new InMemoryBorrowRepository();
+            var persistenceService = new LibraryPersistenceService(new JsonFileDataStore<LibrarySnapshot>(tempFile));
+
+            var book = new Book("978-0134685991", "Clean Code", "Robert C. Martin", "Programming", 1);
+            var copy = new Copy("COPY-001", book);
+            var patron = new Patron("P001", "John Doe", "john@example.com", "+1234567890");
+            var policy = new OverduePolicy();
+            var borrowRecord = new BorrowRecord("B001", patron, copy, policy);
+
+            bookRepo.Add(book);
+            bookRepo.AddCopy(copy);
+            patronRepo.Add(patron);
+            borrowRepo.Add(borrowRecord);
+
+            await persistenceService.SaveAsync(bookRepo.GetAll(), bookRepo.GetAllCopies(), patronRepo.GetAll(), borrowRepo.GetAll());
+
+            var restoreBookRepo = new InMemoryBookRepository();
+            var restorePatronRepo = new InMemoryPatronRepository();
+            var restoreBorrowRepo = new InMemoryBorrowRepository();
+
+            var loadedSnapshot = (await new JsonFileDataStore<LibrarySnapshot>(tempFile).LoadAsync()).FirstOrDefault();
+            Assert.NotNull(loadedSnapshot);
+
+            persistenceService.RestoreState(loadedSnapshot!, restorePatronRepo, restoreBookRepo, restoreBorrowRepo);
+
+            var restoredBorrow = restoreBorrowRepo.GetById("B001");
+            Assert.NotNull(restoredBorrow);
+            Assert.Equal("P001", restoredBorrow!.Patron.PatronId);
+            Assert.Equal("COPY-001", restoredBorrow.Copy.CopyId);
+            Assert.Equal(CopyStatus.Borrowed, restoredBorrow.Copy.Status);
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
     }
 }
