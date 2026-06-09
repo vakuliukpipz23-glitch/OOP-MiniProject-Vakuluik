@@ -82,7 +82,7 @@ public class BorrowRecord
         ReturnDate = returnDate;
         OverdueFee = overdueFee;
 
-        if (!ReturnDate.HasValue)
+        if (!ReturnDate.HasValue && Copy.Status == CopyStatus.Available)
         {
             copy.MarkAsBorrowed();
         }

@@ -7,11 +7,13 @@ public class LibraryQueryService
 {
     private readonly IBookRepository _bookRepository;
     private readonly IBorrowRepository _borrowRepository;
+    private readonly IOverduePolicy _overduePolicy;
 
-    public LibraryQueryService(IBookRepository bookRepository, IBorrowRepository borrowRepository)
+    public LibraryQueryService(IBookRepository bookRepository, IBorrowRepository borrowRepository, IOverduePolicy? overduePolicy = null)
     {
         _bookRepository = bookRepository ?? throw new ArgumentNullException(nameof(bookRepository));
         _borrowRepository = borrowRepository ?? throw new ArgumentNullException(nameof(borrowRepository));
+        _overduePolicy = overduePolicy ?? new OverduePolicy(feePerDay: 0.50m, gracePeriodDays: 0, maxBorrowDays: 30);
     }
 
     public List<Book> SearchBooks(string? title, string? author, string? category)
@@ -46,6 +48,17 @@ public class LibraryQueryService
         return _borrowRepository.GetAll()
             .Where(record => record.ReturnDate is null)
             .OrderBy(record => record.BorrowDate)
+            .ToList();
+    }
+
+    public List<(Patron Patron, decimal OverdueDebt)> GetPatronsWithOverdueDebt()
+    {
+        return _borrowRepository.GetAll()
+            .Where(record => record.ReturnDate is null && record.IsOverdue())
+            .GroupBy(record => record.Patron)
+            .Select(group => (Patron: group.Key, OverdueDebt: group.Sum(record => record.CalculateOverdueFee(_overduePolicy))))
+            .OrderByDescending(item => item.OverdueDebt)
+            .ThenBy(item => item.Patron.Name)
             .ToList();
     }
 
