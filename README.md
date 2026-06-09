@@ -247,3 +247,13 @@ dotnet test --filter "Name~Book_Constructor_WithValidData_CreatesBook"
 
 **Статус**: Lab 34 (Ітерація 1) - Основа Завершена
 **Далі**: Lab 35 (Ітерація 2) - Персистентність Даних та Розширені Функції
+
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
+![alt text](image-3.png)
+
+![alt text](image-4.png)

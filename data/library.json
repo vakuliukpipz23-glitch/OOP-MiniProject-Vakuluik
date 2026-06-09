@@ -1,0 +1,74 @@
+[
+  {
+    "books": [
+      {
+        "isbn": "978-0134685991",
+        "title": "Clean Code",
+        "author": "Robert C. Martin",
+        "category": "Programming",
+        "totalCopies": 3
+      },
+      {
+        "isbn": "978-0201633610",
+        "title": "Design Patterns",
+        "author": "Gang of Four",
+        "category": "Programming",
+        "totalCopies": 2
+      },
+      {
+        "isbn": "978-0201616224",
+        "title": "Refactoring",
+        "author": "Martin Fowler",
+        "category": "Programming",
+        "totalCopies": 2
+      }
+    ],
+    "copies": [
+      {
+        "copyId": "978-0134685991-1",
+        "bookIsbn": "978-0134685991",
+        "status": 0
+      },
+      {
+        "copyId": "978-0134685991-2",
+        "bookIsbn": "978-0134685991",
+        "status": 0
+      },
+      {
+        "copyId": "978-0134685991-3",
+        "bookIsbn": "978-0134685991",
+        "status": 0
+      },
+      {
+        "copyId": "978-0201633610-1",
+        "bookIsbn": "978-0201633610",
+        "status": 0
+      },
+      {
+        "copyId": "978-0201633610-2",
+        "bookIsbn": "978-0201633610",
+        "status": 0
+      },
+      {
+        "copyId": "978-0201616224-1",
+        "bookIsbn": "978-0201616224",
+        "status": 0
+      },
+      {
+        "copyId": "978-0201616224-2",
+        "bookIsbn": "978-0201616224",
+        "status": 0
+      }
+    ],
+    "patrons": [
+      {
+        "patronId": "P639166014167390977",
+        "name": "228",
+        "email": "vakuliuk.p_ipz23@rcit.ukr.education",
+        "phone": "90987234",
+        "registrationDate": "2026-06-09T11:30:16.7393174Z"
+      }
+    ],
+    "borrowRecords": []
+  }
+]
